@@ -25,4 +25,3 @@ else
     echo "The specified server is not running"
     exit -1
 fi
-
