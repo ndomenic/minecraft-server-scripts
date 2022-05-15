@@ -16,6 +16,17 @@ Force stop with no warning:
 
 `./stop.sh .env-server -f` or `./stop.sh .env-server --force`
 
+## Restart a server
+
+Restart with default 15 second warning:
+
+`./restart.sh .env-server`
+
+Force restart with no warning:
+
+`./restart.sh .env-server -f` or `./restart.sh .env-server --force`
+
+
 ## View a running server
 
 `./display.sh .env-server`
