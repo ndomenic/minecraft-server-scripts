@@ -20,9 +20,9 @@ echo ""
 
 #Check if server is running
 if [ $(screen -ls | wc -l) -gt 2 ] && [ $(screen -S $SCREEN_NAME -Q select . ; echo $?) = 0 ]; then
-    if [ $2 = "-f" ] || [ $2 = "--force"]; then
+    if [ $2 ] && [ $2 = '-f' ] || [ $2 = "--force"]; then
         echo "Stopping Minecraft server"
-        
+
         screen -S $SCREEN_NAME -p 0 -X stuff "stop\n"; sleep 3
 
         echo "Minecraft server stopped"
