@@ -2,9 +2,16 @@
 
 A collection of Bash scripts to manage a Minecraft server
 
-To start a server: 
+## Start a server
 
 `./start.sh .env-server`
 
-To stop a server:
+## Stop a server
+
 `./stop.sh .env-server`
+
+## View a running server
+
+`./display.sh .env-server`
+
+To detach from the server's screen session `Ctrl + a + d`
