@@ -15,3 +15,7 @@ A collection of Bash scripts to manage a Minecraft server
 `./display.sh .env-server`
 
 To detach from the server's screen session `Ctrl + a + d`
+
+## Get server status
+
+`./status.sh .env-server`
