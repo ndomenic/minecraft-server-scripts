@@ -20,18 +20,24 @@ echo ""
 
 #Check if server is running
 if [ $(screen -ls | wc -l) -gt 2 ] && [ $(screen -S $SCREEN_NAME -Q select . ; echo $?) = 0 ]; then
-    echo "Stopping Minecraft server in 15 seconds..."
+    if [ $2 = "-f" ] || [ $2 = "--force"]; then
+        screen -S $SCREEN_NAME -p 0 -X stuff "stop\n"; sleep 3
 
-    screen -S $SCREEN_NAME -p 0 -X stuff "say The server will shut down in 15 seconds\n"; sleep 10
-    screen -S $SCREEN_NAME -p 0 -X stuff "say The server will shut down in 5 seconds\n"; sleep 1
-    screen -S $SCREEN_NAME -p 0 -X stuff "say The server will shut down in 4 seconds\n"; sleep 1
-    screen -S $SCREEN_NAME -p 0 -X stuff "say The server will shut down in 3 seconds\n"; sleep 1
-    screen -S $SCREEN_NAME -p 0 -X stuff "say The server will shut down in 2 seconds\n"; sleep 1
-    screen -S $SCREEN_NAME -p 0 -X stuff "say The server will shut down in 1 second\n"; sleep 1
+        echo "Minecraft server stopped"
+    else
+        echo "Stopping Minecraft server in 15 seconds..."
 
-    screen -S $SCREEN_NAME -p 0 -X stuff "stop\n"; sleep 1
+        screen -S $SCREEN_NAME -p 0 -X stuff "say The server will shut down in 15 seconds\n"; sleep 10
+        screen -S $SCREEN_NAME -p 0 -X stuff "say The server will shut down in 5 seconds\n"; sleep 1
+        screen -S $SCREEN_NAME -p 0 -X stuff "say The server will shut down in 4 seconds\n"; sleep 1
+        screen -S $SCREEN_NAME -p 0 -X stuff "say The server will shut down in 3 seconds\n"; sleep 1
+        screen -S $SCREEN_NAME -p 0 -X stuff "say The server will shut down in 2 seconds\n"; sleep 1
+        screen -S $SCREEN_NAME -p 0 -X stuff "say The server will shut down in 1 second\n"; sleep 1
 
-    echo "Minecraft server stopped"
+        screen -S $SCREEN_NAME -p 0 -X stuff "stop\n"; sleep 3
+
+        echo "Minecraft server stopped"
+    fi
 else 
     echo "The specified server is not running"
     exit -1
