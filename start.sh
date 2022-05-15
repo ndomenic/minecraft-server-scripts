@@ -26,10 +26,6 @@ fi
 
 echo "Attempting to start server..."
 
-MEM_MAX=4096
-MEM_MIN=1024
-SERVER_JAR=fabric-server-launch.jar
-
-cd $SERVER_PATH; screen -m -d -S $SCREEN_NAME java -Xmx${MEM_MAX}M -Xms${MEM_MIN}M  -jar ${SERVER_JAR} nogui;
+cd $SERVER_PATH; screen -m -d -S $SCREEN_NAME java -Xmx${MEM_MAX}M -Xms${MEM_MIN}M  -jar ${SERVER_JAR} nogui; sleep 3
 
 echo "Started Minecraft server"
