@@ -19,7 +19,7 @@ echo "server path = ${SERVER_PATH}"
 echo ""
 
 #Check if server is running
-if [ $(screen -ls | wc -l) > 3 ] && [ $(screen -S $SCREEN_NAME -Q select . ; echo $?) = 0 ]; then
+if [ $(screen -ls | wc -l) -gt 2 ] && [ $(screen -S $SCREEN_NAME -Q select . ; echo $?) = 0 ]; then
     echo "Stopping Minecraft server in 15 seconds..."
 
     screen -S $SCREEN_NAME -p 0 -X stuff "say The server will shut down in 15 seconds\n"; sleep 10
@@ -34,5 +34,6 @@ if [ $(screen -ls | wc -l) > 3 ] && [ $(screen -S $SCREEN_NAME -Q select . ; ech
     echo "Minecraft server stopped"
 else 
     echo "The specified server is not running"
+    exit -1
 fi
 
