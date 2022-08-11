@@ -19,7 +19,7 @@ echo "server path = ${SERVER_PATH}"
 echo ""
 
 #Check if server is running
-if [ $(screen -ls | wc -l) -gt 2 ] && [ $(screen -S $SCREEN_NAME -Q select . ; echo $?) = 0 ]; then
+if [ $(screen -ls | wc -l) -gt 2 ] && [ $(screen -S $SCREEN_NAME -Q select . ; echo $?) -eq 0 ]; then
     if [ $2 ] && [ $2 = '-f' ] || [ $2 = "--force"]; then
         echo "Stopping Minecraft server"
 
