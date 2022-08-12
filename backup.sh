@@ -3,12 +3,11 @@
 ./status.sh $1
 SERVER_STATUS=$?
 export $(cat $1 | xargs)
-shift 1
 echo ""
 
-if [ $1 ]; then
-    if [ -f $1 ]; then
-        export $(cat $1 | xargs)
+if [ $2 ]; then
+    if [ -f $2 ]; then
+        export $(cat $2 | xargs)
     else
         echo "Please provide a valid webhook environment file"
         exit -1
@@ -50,8 +49,8 @@ stop_server_delayed () {
 }
 
 if ! [ $SERVER_STATUS -eq 0 ]; then
-    if [ $1 ]; then
-        if [ $1 == '-f' ] || [ $1 == '--force' ]; then
+    if [ $3 ]; then
+        if [ $3 == '-f' ] || [ $3 == '--force' ]; then
             stop_server
         else
             stop_server_delayed
@@ -60,7 +59,10 @@ if ! [ $SERVER_STATUS -eq 0 ]; then
         stop_server_delayed
     fi
 
-    if [ $(screen -ls | wc -l) -gt 2 ] && [ $(screen -S $SCREEN_NAME -Q select . ; echo $?) -eq 0 ]; then
+    ./status.sh $1
+    NEW_SERVER_STATUS=$?
+
+    if ! [ $NEW_SERVER_STATUS -eq 0 ]; then
         ERROR_MESSAGE='Server failed to stop'
         handle_failure
         exit -1
