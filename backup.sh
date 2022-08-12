@@ -23,6 +23,8 @@ handle_failure () {
       --webhook-url=$WEBHOOK \
       --username "Minecraft Backups" \
       --text "$ERROR_MESSAGE"
+    
+    exit -1
 }
 
 stop_server () {
@@ -65,7 +67,6 @@ if ! [ $SERVER_STATUS -eq 0 ]; then
     if ! [ $NEW_SERVER_STATUS -eq 0 ]; then
         ERROR_MESSAGE='Server failed to stop'
         handle_failure
-        exit -1
     fi
 fi
 
@@ -74,36 +75,30 @@ if [ $SERVER_PATH ]; then
     if [ ! -d $SERVER_PATH ]; then
         ERROR_MESSAGE='Server directory does not exist'
         handle_failure
-        exit -1
     fi
 
     if [ $WORLD_FOLDER ]; then
         if [ ! -d $FULL_WORLD_PATH ]; then
             ERROR_MESSAGE='World directory does not exist'
             handle_failure
-            exit -1
         fi
     else
         ERROR_MESSAGE='World path was not found in environment file'
         handle_failure
-        exit -1
     fi
 else
     ERROR_MESSAGE='Server path was not found in environment file'
     handle_failure
-    exit -1
 fi
 
 if [ $BACKUP_PATH ]; then
     if [ ! -d $BACKUP_PATH ]; then
         ERROR_MESSAGE='Backup directory does not exist'
         handle_failure
-        exit -1
     fi
 else
     ERROR_MESSAGE='Backup path was not found in environment file'
     handle_failure
-    exit -1
 fi
 
 BACKUP_FOLDER="$(date '+%m-%d-%Y(%H:%M:%S)')"
@@ -123,7 +118,6 @@ cp -r $FULL_WORLD_PATH $FULL_BACKUP_PATH
 if [ $? != 0 ]; then
     ERROR_MESSAGE='Failed to copy files during backup'
     handle_failure
-    exit -1
 fi
 
 echo "Verifying files are identical..."
@@ -133,7 +127,6 @@ diff -rq --no-dereference $FULL_WORLD_PATH $FULL_BACKUP_PATH
 if [ $? != 0 ]; then
     ERROR_MESSAGE="Files are not the same $?"
     handle_failure
-    exit -1
 fi
 
 echo "Backup completed"
