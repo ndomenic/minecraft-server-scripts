@@ -6,6 +6,6 @@ export $(cat $1 | xargs)
 shift 1
 echo ""
 
-if [ $SERVER_STATUS -eq 0 ]; then
+if ! [ $SERVER_STATUS -eq 0 ]; then
     screen -R $SCREEN_NAME
 fi
