@@ -1,38 +1,28 @@
 #!/bin/bash
 
-#Load environment variables from arguments
-if [ $1 ]; then
-    if [ -f $1 ]; then
-        export $(cat $1 | xargs)
-    else
-        echo "Please provide a valid environment file"
-        exit -1
-    fi
-else
-    echo "Please specify an environment file for the server"
-    exit -1
-fi
-
-echo "Received environemnt file $1"
-echo "screen name = ${SCREEN_NAME}"
-echo "server path = ${SERVER_PATH}"
+./status.sh $1
+SERVER_STATUS=$?
+export $(cat $1 | xargs)
+shift 1
 echo ""
 
-#Check if server is running
-if [ $(screen -ls | wc -l) -gt 2 ] && [ $(screen -S $SCREEN_NAME -Q select . ; echo $?) -eq 0 ]; then
-    if [ $2 ] && [ $2 = '-f' ] || [ $2 = "--force"]; then
-        echo "Stopping Minecraft server"
+restart_server () {
+    echo "Stopping Minecraft server..."
 
-        screen -S $SCREEN_NAME -p 0 -X stuff "stop\n"; sleep 3
+    screen -S $SCREEN_NAME -p 0 -X stuff "stop\n"; sleep 3
+    
+    echo "Starting Minecraft server..."
 
-        echo "Starting Minecraft server..."
+    cd $SERVER_PATH; screen -m -d -S $SCREEN_NAME java -Xmx${MEM_MAX}M -Xms${MEM_MIN}M  -jar ${SERVER_JAR} nogui; sleep 3
 
-        cd $SERVER_PATH; screen -m -d -S $SCREEN_NAME java -Xmx${MEM_MAX}M -Xms${MEM_MIN}M  -jar ${SERVER_JAR} nogui; sleep 3
+    echo "Restarted Minecraft server"
+}
 
-        echo "Restarted Minecraft server"
-        
+if ! [ $SERVER_STATUS -eq 0 ]; then
+    if [ $1 ] && [ $1 = '-f' ] || [ $1 = "--force"]; then
+        restart_server
     else
-        echo "Stopping Minecraft server in 15 seconds..."
+        echo "Restarting Minecraft server in 15 seconds..."
 
         screen -S $SCREEN_NAME -p 0 -X stuff "say The server will restart in 15 seconds\n"; sleep 10
         screen -S $SCREEN_NAME -p 0 -X stuff "say The server will restart in 5 seconds\n"; sleep 1
@@ -41,17 +31,6 @@ if [ $(screen -ls | wc -l) -gt 2 ] && [ $(screen -S $SCREEN_NAME -Q select . ; e
         screen -S $SCREEN_NAME -p 0 -X stuff "say The server will restart in 2 seconds\n"; sleep 1
         screen -S $SCREEN_NAME -p 0 -X stuff "say The server will restart in 1 second\n"; sleep 1
 
-        echo "Stopping Minecraft server..."
-
-        screen -S $SCREEN_NAME -p 0 -X stuff "stop\n"; sleep 3
-        
-        echo "Starting Minecraft server..."
-
-        cd $SERVER_PATH; screen -m -d -S $SCREEN_NAME java -Xmx${MEM_MAX}M -Xms${MEM_MIN}M  -jar ${SERVER_JAR} nogui; sleep 3
-
-        echo "Restarted Minecraft server"
+        restart_server
     fi
-else 
-    echo "The specified server is not running"
-    exit -1
 fi
