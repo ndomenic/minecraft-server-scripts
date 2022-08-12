@@ -27,40 +27,43 @@ handle_failure () {
 }
 
 stop_server () {
+    echo "Stopping Minecraft server"
+
     screen -S $SCREEN_NAME -p 0 -X stuff "kick @a The server has shut down to perform an automated backup\n"; sleep 3
     screen -S $SCREEN_NAME -p 0 -X stuff "stop\n"; sleep 3
 
     echo "Minecraft server stopped"
 }
 
-echo "Received environemnt file $1"
-echo "screen name = ${SCREEN_NAME}"
-echo "server path = ${SERVER_PATH}"
-echo ""
+stop_server_delayed () {
+    echo "Stopping Minecraft server in 60 seconds..."
+
+    screen -S $SCREEN_NAME -p 0 -X stuff "say The server will shut down in 1 minute to perform an automated backup\n"; sleep 45
+    screen -S $SCREEN_NAME -p 0 -X stuff "say The server will shut down in 15 seconds\n"; sleep 10
+    screen -S $SCREEN_NAME -p 0 -X stuff "say The server will shut down in 5 seconds\n"; sleep 1
+    screen -S $SCREEN_NAME -p 0 -X stuff "say The server will shut down in 4 seconds\n"; sleep 1
+    screen -S $SCREEN_NAME -p 0 -X stuff "say The server will shut down in 3 seconds\n"; sleep 1
+    screen -S $SCREEN_NAME -p 0 -X stuff "say The server will shut down in 2 seconds\n"; sleep 1
+    screen -S $SCREEN_NAME -p 0 -X stuff "say The server will shut down in 1 second\n"; sleep 1
+
+    stop_server
+}
 
 if ! [ $SERVER_STATUS -eq 0 ]; then
-    if [ $2 ] && [ $2 = '-f' ] || [ $2 = "--force"]; then
-        echo "Stopping Minecraft server"
-
-        stop_server
-    else
-        echo "Stopping Minecraft server in 60 seconds..."
-
-        screen -S $SCREEN_NAME -p 0 -X stuff "say The server will shut down in 1 minute to perform an automated backup\n"; sleep 45
-        screen -S $SCREEN_NAME -p 0 -X stuff "say The server will shut down in 15 seconds\n"; sleep 10
-        screen -S $SCREEN_NAME -p 0 -X stuff "say The server will shut down in 5 seconds\n"; sleep 1
-        screen -S $SCREEN_NAME -p 0 -X stuff "say The server will shut down in 4 seconds\n"; sleep 1
-        screen -S $SCREEN_NAME -p 0 -X stuff "say The server will shut down in 3 seconds\n"; sleep 1
-        screen -S $SCREEN_NAME -p 0 -X stuff "say The server will shut down in 2 seconds\n"; sleep 1
-        screen -S $SCREEN_NAME -p 0 -X stuff "say The server will shut down in 1 second\n"; sleep 1
-
-        stop_server
-
-        if [ $(screen -ls | wc -l) -gt 2 ] && [ $(screen -S $SCREEN_NAME -Q select . ; echo $?) -eq 0 ]; then
-            ERROR_MESSAGE='Server failed to stop'
-            handle_failure
-            exit -1
+    if [ $1 ]; then
+        if [ $1 == '-f' ] || [ $1 == '--force' ]; then
+            stop_server
+        else
+            stop_server_delayed
         fi
+    else
+        stop_server_delayed
+    fi
+
+    if [ $(screen -ls | wc -l) -gt 2 ] && [ $(screen -S $SCREEN_NAME -Q select . ; echo $?) -eq 0 ]; then
+        ERROR_MESSAGE='Server failed to stop'
+        handle_failure
+        exit -1
     fi
 fi
 
@@ -131,5 +134,9 @@ if [ $? != 0 ]; then
 fi
 
 echo "Backup completed"
+
+cd $SERVER_PATH; screen -m -d -S $SCREEN_NAME java -Xmx${MEM_MAX}M -Xms${MEM_MIN}M  -jar ${SERVER_JAR} nogui; sleep 3
+
+echo "Restarted Minecraft server"
 
 exit 0
