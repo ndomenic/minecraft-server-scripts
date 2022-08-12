@@ -13,10 +13,9 @@ else
     exit -1
 fi
 
-WEBHOOK_ENV='.env-webhook'
-if [ $WEBHOOK_ENV ]; then
-    if [ -f $WEBHOOK_ENV ]; then
-        export $(cat $WEBHOOK_ENV | xargs)
+if [ $2 ]; then
+    if [ -f $2 ]; then
+        export $(cat $2| xargs)
     else
         echo "Please provide a valid webhook environment file"
         exit -1
@@ -48,7 +47,7 @@ echo ""
 
 #Check if server is running, and stop it if so 
 if [ $(screen -ls | wc -l) -gt 2 ] && [ $(screen -S $SCREEN_NAME -Q select . ; echo $?) -eq 0 ]; then
-    if [ $2 ] && [ $2 = '-f' ] || [ $2 = "--force"]; then
+    if [ $3 ] && [ $3 = '-f' ] || [ $3 = "--force"]; then
         echo "Stopping Minecraft server"
 
         stop_server
