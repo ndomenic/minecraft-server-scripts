@@ -135,4 +135,9 @@ echo "Backup completed"
 
 echo "Restarted Minecraft server"
 
+./discord.sh \
+--webhook-url=$WEBHOOK \
+--username "Minecraft Backups" \
+--text "Backup complete on $(date '+%m-%d-%Y (%H:%M:%S)')"
+
 exit 0
