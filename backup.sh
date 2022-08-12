@@ -138,7 +138,7 @@ fi
 
 echo "Backup completed"
 
-cd $SERVER_PATH; screen -m -d -S $SCREEN_NAME java -Xmx${MEM_MAX}M -Xms${MEM_MIN}M  -jar ${SERVER_JAR} nogui; sleep 3
+./start.sh $1 > /dev/null
 
 echo "Restarted Minecraft server"
 
