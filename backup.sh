@@ -34,6 +34,13 @@ handle_failure () {
       --text "$ERROR_MESSAGE"
 }
 
+stop_server () {
+    screen -S $SCREEN_NAME -p 0 -X stuff "kick @a The server has shut down to perform an automated backup\n"; sleep 3
+    screen -S $SCREEN_NAME -p 0 -X stuff "stop\n"; sleep 3
+
+    echo "Minecraft server stopped"
+}
+
 echo "Received environemnt file $1"
 echo "screen name = ${SCREEN_NAME}"
 echo "server path = ${SERVER_PATH}"
@@ -44,9 +51,7 @@ if [ $(screen -ls | wc -l) -gt 2 ] && [ $(screen -S $SCREEN_NAME -Q select . ; e
     if [ $2 ] && [ $2 = '-f' ] || [ $2 = "--force"]; then
         echo "Stopping Minecraft server"
 
-        screen -S $SCREEN_NAME -p 0 -X stuff "stop\n"; sleep 3
-
-        echo "Minecraft server stopped"
+        stop_server
     else
         echo "Stopping Minecraft server in 60 seconds..."
 
@@ -58,10 +63,7 @@ if [ $(screen -ls | wc -l) -gt 2 ] && [ $(screen -S $SCREEN_NAME -Q select . ; e
         screen -S $SCREEN_NAME -p 0 -X stuff "say The server will shut down in 2 seconds\n"; sleep 1
         screen -S $SCREEN_NAME -p 0 -X stuff "say The server will shut down in 1 second\n"; sleep 1
 
-        screen -S $SCREEN_NAME -p 0 -X stuff "kick @a The server has shut down to perform an automated backup\n"; sleep 3
-        screen -S $SCREEN_NAME -p 0 -X stuff "stop\n"; sleep 3
-
-        echo "Minecraft server stopped"
+        stop_server
 
         if [ $(screen -ls | wc -l) -gt 2 ] && [ $(screen -S $SCREEN_NAME -Q select . ; echo $?) -eq 0 ]; then
             ERROR_MESSAGE='Server failed to stop'
@@ -71,14 +73,39 @@ if [ $(screen -ls | wc -l) -gt 2 ] && [ $(screen -S $SCREEN_NAME -Q select . ; e
     fi
 fi
 
-if [ ! -d $WORLD_PATH ]; then
-    ERROR_MESSAGE='World path was not found'
+FULL_WORLD_PATH="$SERVER_PATH/$WORLD_FOLDER"
+if [ $SERVER_PATH ]; then
+    if [ ! -d $SERVER_PATH ]; then
+        ERROR_MESSAGE='Server directory does not exist'
+        handle_failure
+        exit -1
+    fi
+
+    if [ $WORLD_FOLDER ]; then
+        if [ ! -d $FULL_WORLD_PATH ]; then
+            ERROR_MESSAGE='World directory does not exist'
+            handle_failure
+            exit -1
+        fi
+    else
+        ERROR_MESSAGE='World path was not found in environment file'
+        handle_failure
+        exit -1
+    fi
+else
+    ERROR_MESSAGE='Server path was not found in environment file'
     handle_failure
     exit -1
 fi
 
-if [ ! -d $BACKUP_PATH ]; then
-    ERROR_MESSAGE='Backup path was not found'
+if [ $BACKUP_PATH ]; then
+    if [ ! -d $BACKUP_PATH ]; then
+        ERROR_MESSAGE='Backup directory does not exist'
+        handle_failure
+        exit -1
+    fi
+else
+    ERROR_MESSAGE='Backup path was not found in environment file'
     handle_failure
     exit -1
 fi
@@ -88,11 +115,30 @@ FULL_BACKUP_PATH="$BACKUP_PATH/$BACKUP_FOLDER"
 
 echo "Server backup path:"
 echo $FULL_BACKUP_PATH
+echo "World path:"
+echo $FULL_WORLD_PATH
+echo ""
 
-mkdir "$FULL_BACKUP_PATH"
+echo "Beginning backup..."
 
-if [ ! -d $FULL_BACKUP_PATH ]; then
-    ERROR_MESSAGE='Unable to create backup directory'
+cp -r $FULL_WORLD_PATH $FULL_BACKUP_PATH
+
+if [ $? != 0 ]; then
+    ERROR_MESSAGE='Failed to copy files during backup'
     handle_failure
     exit -1
 fi
+
+echo "Verifying files are identical..."
+
+diff -rq --no-dereference $FULL_WORLD_PATH $FULL_BACKUP_PATH
+
+if [ $? != 0 ]; then
+    ERROR_MESSAGE="Files are not the same $?"
+    handle_failure
+    exit -1
+fi
+
+echo "Backup completed"
+
+exit 0
