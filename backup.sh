@@ -59,7 +59,7 @@ if ! [ $SERVER_STATUS -eq 0 ]; then
         stop_server_delayed
     fi
 
-    ./status.sh $1
+    ./status.sh $1 > /dev/null
     NEW_SERVER_STATUS=$?
 
     if ! [ $NEW_SERVER_STATUS -eq 0 ]; then
@@ -109,6 +109,7 @@ fi
 BACKUP_FOLDER="$(date '+%m-%d-%Y(%H:%M:%S)')"
 FULL_BACKUP_PATH="$BACKUP_PATH/$BACKUP_FOLDER"
 
+echo ""
 echo "Server backup path:"
 echo $FULL_BACKUP_PATH
 echo "World path:"
