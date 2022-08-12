@@ -7,12 +7,14 @@ shift 1
 
 if ! [ $SERVER_STATUS -eq 0 ]; then
     if [ $1 ] && [ $1 = '-f' ] || [ $1 = "--force"]; then
+        echo ""
         echo "Stopping Minecraft server"
 
         screen -S $SCREEN_NAME -p 0 -X stuff "stop\n"; sleep 3
 
         echo "Minecraft server stopped"
     else
+        echo ""
         echo "Stopping Minecraft server in 15 seconds..."
 
         screen -S $SCREEN_NAME -p 0 -X stuff "say The server will shut down in 15 seconds\n"; sleep 10
