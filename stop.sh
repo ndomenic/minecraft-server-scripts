@@ -4,6 +4,7 @@
 SERVER_STATUS=$?
 export $(cat $1 | xargs)
 shift 1
+echo ""
 
 stop_server () {
     screen -S $SCREEN_NAME -p 0 -X stuff "stop\n"; sleep 3
@@ -12,12 +13,10 @@ stop_server () {
 
 if ! [ $SERVER_STATUS -eq 0 ]; then
     if [ $1 ] && [ $1 = '-f' ] || [ $1 = "--force"]; then
-        echo ""
         echo "Stopping Minecraft server"
 
         stop_server
     else
-        echo ""
         echo "Stopping Minecraft server in 15 seconds..."
 
         screen -S $SCREEN_NAME -p 0 -X stuff "say The server will shut down in 15 seconds\n"; sleep 10
