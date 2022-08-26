@@ -103,7 +103,7 @@ else
     handle_failure
 fi
 
-BACKUP_FOLDER="$(date '+%m-%d-%Y (%H:%M:%S)')"
+BACKUP_FOLDER="$(date '+%b-%d-%Y (%H:%M:%S)')"
 FULL_BACKUP_PATH="$BACKUP_PATH/$BACKUP_FOLDER"
 
 echo ""
@@ -124,7 +124,7 @@ fi
 
 echo "Verifying files are identical..."
 
-diff -rq --no-dereference $FULL_WORLD_PATH $FULL_BACKUP_PATH
+diff -rq --no-dereference "$FULL_WORLD_PATH" "$FULL_BACKUP_PATH"
 
 if [ $? != 0 ]; then
     ERROR_MESSAGE="Files are not the same $?"
