@@ -50,6 +50,7 @@ stop_server_delayed () {
     stop_server
 }
 
+SERVER_ALREADY_RUNNING=false
 if ! [ $SERVER_STATUS -eq 0 ]; then
     if [ $3 ]; then
         if [ $3 == '-f' ] || [ $3 == '--force' ]; then
@@ -61,6 +62,7 @@ if ! [ $SERVER_STATUS -eq 0 ]; then
         stop_server_delayed
     fi
 
+    SERVER_ALREADY_RUNNING=true
     ./status.sh $1 > /dev/null
     NEW_SERVER_STATUS=$?
 
@@ -131,9 +133,10 @@ fi
 
 echo "Backup completed"
 
-./start.sh $1 > /dev/null
-
-echo "Restarted Minecraft server"
+if [ "$SERVER_ALREADY_RUNNING" = true ]; then
+    ./start.sh $1 > /dev/null
+    echo "Restarted Minecraft server"
+fi
 
 ./discord.sh \
 --webhook-url=$WEBHOOK \
