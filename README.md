@@ -4,6 +4,7 @@ A collection of Bash scripts to manage a Minecraft server. Every script requires
 
 ### Server environment file
 ```
+SERVER_NAME=my_server
 SERVER_PATH=/home/ubuntu/minecraft
 WORLD_FOLDER=world
 BACKUP_PATH=/media/minecraft_backups/server

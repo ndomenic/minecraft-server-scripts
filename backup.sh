@@ -22,7 +22,7 @@ handle_failure () {
     ./discord.sh \
       --webhook-url=$WEBHOOK \
       --username "Minecraft Backups" \
-      --text "$ERROR_MESSAGE"
+      --text "$ERROR_MESSAGE\nServer: $SERVER_NAME"
     
     exit -1
 }
@@ -141,6 +141,6 @@ fi
 ./discord.sh \
 --webhook-url=$WEBHOOK \
 --username "Minecraft Backups" \
---text "Backup complete on $(date '+%m-%d-%Y (%H:%M:%S)')"
+--text "Backup of server $SERVER_NAME completed on $(date '+%m-%d-%Y (%H:%M:%S)')"
 
 exit 0
