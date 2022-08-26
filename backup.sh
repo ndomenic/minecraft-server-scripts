@@ -22,7 +22,7 @@ handle_failure () {
     ./discord.sh \
       --webhook-url=$WEBHOOK \
       --username "Minecraft Backups" \
-      --text "$ERROR_MESSAGE\nServer: $SERVER_NAME"
+      --text "$ERROR_MESSAGE\nServer: $SERVER_NAME\n$(date '+%b-%d-%Y (%H:%M:%S)')"
     
     exit -1
 }
@@ -103,7 +103,7 @@ else
     handle_failure
 fi
 
-BACKUP_FOLDER="$(date '+%m-%d-%Y(%H:%M:%S)')"
+BACKUP_FOLDER="$(date '+%m-%d-%Y (%H:%M:%S)')"
 FULL_BACKUP_PATH="$BACKUP_PATH/$BACKUP_FOLDER"
 
 echo ""
@@ -115,7 +115,7 @@ echo ""
 
 echo "Beginning backup..."
 
-cp -r $FULL_WORLD_PATH $FULL_BACKUP_PATH
+cp -r "$FULL_WORLD_PATH" "$FULL_BACKUP_PATH"
 
 if [ $? != 0 ]; then
     ERROR_MESSAGE='Failed to copy files during backup'
@@ -141,6 +141,6 @@ fi
 ./discord.sh \
 --webhook-url=$WEBHOOK \
 --username "Minecraft Backups" \
---text "Backup of server $SERVER_NAME completed on $(date '+%m-%d-%Y (%H:%M:%S)')"
+--text "Backup of server $SERVER_NAME completed on $(date '+%b-%d-%Y (%H:%M:%S)')"
 
 exit 0
