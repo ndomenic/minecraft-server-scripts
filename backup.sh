@@ -1,19 +1,61 @@
 #!/bin/bash
 
-./status.sh $1
-SERVER_STATUS=$?
-export $(cat $1 | xargs)
-echo ""
+POSITIONAL_ARGS=()
+KICK_MESSAGE="The server has restarted to perform a backup"
+WARN_MESSAGE="The server will restart to perform a backup"
 
-if [ $2 ]; then
-    if [ -f $2 ]; then
-        export $(cat $2 | xargs)
-    else
-        echo "Please provide a valid webhook environment file"
+while [[ $# -gt 0 ]]; do
+    case $1 in
+        .env-webhook)
+        WEBHOOK=$1
+        shift
+        ;;
+        .env-*)
+        SERVER_ENV=$1
+        shift
+        ;;
+        -wm|--warn-message)
+        WARN_MESSAGE="$2"
+        shift
+        shift
+        ;;
+        -km|--kick-message)
+        KICK_MESSAGE="$2"
+        shift
+        shift
+        ;;
+        -f|--force)
+        FORCE=true
+        shift
+        ;;
+        -v|--verbose)
+        VERBOSE=true
+        shift
+        ;;
+        -*|--*)
+        echo "Unknown option $1"
         exit -1
-    fi
+        ;;
+        *)
+        POSITIONAL_ARGS+=("$1")
+        shift
+        ;;
+    esac
+done
+
+set -- "${POSITIONAL_ARGS[@]}"
+
+if [ $SERVER_ENV ]; then
+    export $(cat $SERVER_ENV | xargs)
 else
-    echo "Please provide a valid webhook environment file"
+    echo "Please provide a valid server environment file"
+    exit -1
+fi
+
+if [ $WEBHOOK ]; then
+    export $(cat $WEBHOOK | xargs)
+else
+    echo "Please provide a valid webhook"
     exit -1
 fi
 
@@ -27,46 +69,37 @@ handle_failure () {
     exit -1
 }
 
-stop_server () {
-    echo "Stopping Minecraft server"
+if [ $VERBOSE ]; then
+    echo "Received environemnt file $SERVER_ENV"
+    echo "screen name = ${SCREEN_NAME}"
+    echo "server path = ${SERVER_PATH}"
+    echo ""
+    ./status.sh $SERVER_ENV
+else
+    ./status.sh $SERVER_ENV > /dev/null
+fi
 
-    screen -S $SCREEN_NAME -p 0 -X stuff "kick @a The server has shut down to perform an automated backup\n"; sleep 3
-    screen -S $SCREEN_NAME -p 0 -X stuff "stop\n"; sleep 3
+SERVER_STATUS=$?
 
-    echo "Minecraft server stopped"
-}
-
-stop_server_delayed () {
-    echo "Stopping Minecraft server in 60 seconds..."
-
-    screen -S $SCREEN_NAME -p 0 -X stuff "say The server will shut down in 1 minute to perform an automated backup\n"; sleep 45
-    screen -S $SCREEN_NAME -p 0 -X stuff "say The server will shut down in 15 seconds\n"; sleep 10
-    screen -S $SCREEN_NAME -p 0 -X stuff "say The server will shut down in 5 seconds\n"; sleep 1
-    screen -S $SCREEN_NAME -p 0 -X stuff "say The server will shut down in 4 seconds\n"; sleep 1
-    screen -S $SCREEN_NAME -p 0 -X stuff "say The server will shut down in 3 seconds\n"; sleep 1
-    screen -S $SCREEN_NAME -p 0 -X stuff "say The server will shut down in 2 seconds\n"; sleep 1
-    screen -S $SCREEN_NAME -p 0 -X stuff "say The server will shut down in 1 second\n"; sleep 1
-
-    stop_server
-}
-
-SERVER_ALREADY_RUNNING=false
+RUNNING=false
 if ! [ $SERVER_STATUS -eq 0 ]; then
-    if [ $3 ]; then
-        if [ $3 == '-f' ] || [ $3 == '--force' ]; then
-            stop_server
-        else
-            stop_server_delayed
-        fi
+    RUNNING=true
+
+    if [ $FORCE ]; then
+        ./stop.sh $SERVER_ENV -wm "$WARN_MESSAGE" -km "$KICK_MESSAGE" -f
     else
-        stop_server_delayed
+        ./stop.sh $SERVER_ENV -wm "$WARN_MESSAGE" -km "$KICK_MESSAGE"
     fi
+    
+    sleep 30
+    if [ $VERBOSE ]; then
+        ./status.sh $SERVER_ENV
+    else
+        ./status.sh $SERVER_ENV > /dev/null
+    fi
+    SERVER_STATUS=$?
 
-    SERVER_ALREADY_RUNNING=true
-    ./status.sh $1 > /dev/null
-    NEW_SERVER_STATUS=$?
-
-    if ! [ $NEW_SERVER_STATUS -eq 0 ]; then
+    if ! [ $SERVER_STATUS -eq 0 ]; then
         ERROR_MESSAGE='Server failed to stop'
         handle_failure
     fi
@@ -133,8 +166,17 @@ fi
 
 echo "Backup completed"
 
-if [ "$SERVER_ALREADY_RUNNING" = true ]; then
-    ./start.sh $1 > /dev/null
+if [ $RUNNING ]; then
+    if [ $VERBOSE ]; then
+        ./start.sh $SERVER_ENV
+    else
+        ./start.sh $SERVER_ENV > /dev/null
+    fi
+
+    if [ $? != 1 ]; then
+        ERROR_MESSAGE="Server failed to start"
+        handle_failure
+    fi
     echo "Restarted Minecraft server"
 fi
 
