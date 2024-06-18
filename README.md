@@ -21,48 +21,51 @@ WEBHOOK=https://discord.com/api/webhooks/yourwebhookhere
 
 ## Start a server
 
-`./start.sh .env-server`
+`./mcs.sh start .env-server`
 
 ## Stop a server
 
 Stop with default 15 second warning:
 
-`./stop.sh .env-server`
+`./mcs.sh stop .env-server`
 
 Force stop with no warning:
 
-`./stop.sh .env-server -f` or `./stop.sh .env-server --force`
+`./mcs.sh stop .env-server -f` or `./mcs.sh stop .env-server --force`
 
 ## Restart a server
 
 Restart with default 15 second warning:
 
-`./restart.sh .env-server`
+`./mcs.sh restart .env-server`
 
 Force restart with no warning:
 
-`./restart.sh .env-server -f` or `./restart.sh .env-server --force`
+`./mcs.sh restart .env-server -f` or `./mcs.sh restart .env-server --force`
 
 
 ## View a running server
 
-`./display.sh .env-server`
+`./mcs.sh display .env-server`
 
 To detach from the server's screen session `Ctrl + a + d`
 
 ## Get server status
 
-`./status.sh .env-server`
+`./mcs.sh status.env-server`
 
 ## Backup a server
 
 Backup with default 60 second warning:
 
-`./backup.sh .env-server .env-webhook`
+`./mcs.sh backup .env-server .env-webhook`
 
 Force backup with no warning:
 
-`./backup.sh .env-server .env-webhook -f ` or `./backup.sh .env-server .env-webhook --force`
+`./mcs.sh backup .env-server .env-webhook -f ` or `./mcs.sh backup .env-server .env-webhook --force`
+
+If no webhook is supplied with the backup command `./mcs.sh backup .env-server` then a default webhook will be used, located at:
+`/home/ubuntu/minecraft-server-scripts/env/.env-webhook`
 
 **Requires a Discord webhook specified in a separate webhook environment file**
 

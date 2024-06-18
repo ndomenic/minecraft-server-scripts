@@ -1,33 +1,21 @@
 #!/bin/bash
 
-POSITIONAL_ARGS=()
-
 while [[ $# -gt 0 ]]; do
     case $1 in
-        .env-webhook)
-        WEBHOOK=$1
-        shift
-        ;;
         .env-*)
-        SERVER_ENV=$1
-        shift
-        ;;
+            SERVER_ENV=$1
+            shift
+            ;;
         -v|--verbose)
-        VERBOSE=true
-        shift
-        ;;
-        -*|--*)
-        echo "Unknown option $1"
-        exit -1
-        ;;
-        *)
-        POSITIONAL_ARGS+=("$1")
-        shift
-        ;;
+            VERBOSE=true
+            shift
+            ;;
+        -*|--*|*)
+            echo "Unknown option $1"
+            exit -1
+            ;;
     esac
 done
-
-set -- "${POSITIONAL_ARGS[@]}"
 
 if [ $SERVER_ENV ]; then
     export $(cat $SERVER_ENV | xargs)
@@ -37,13 +25,13 @@ else
 fi
 
 if [ $VERBOSE ]; then
-    echo "Received environemnt file $SERVER_ENV"
+    echo "Received environment file $SERVER_ENV"
     echo "screen name = ${SCREEN_NAME}"
     echo "server path = ${SERVER_PATH}"
     echo ""
 fi
 
-#Check if server is running
+# Check if server is running
 if [ $(screen -ls | wc -l) -gt 2 ]; then
     screen_running=$(screen -S $SCREEN_NAME -Q select . ; echo $?)  
     if [[ $screen_running =~ ^[0-9]+$ ]] && [ $screen_running -eq 0 ]; then

@@ -1,49 +1,42 @@
 #!/bin/bash
 
-POSITIONAL_ARGS=()
 KICK_MESSAGE="The server has restarted to perform a backup"
 WARN_MESSAGE="The server will restart to perform a backup"
 
 while [[ $# -gt 0 ]]; do
     case $1 in
-        .env-webhook)
-        WEBHOOK=$1
-        shift
-        ;;
+        *.env-webhook)
+            WEBHOOK=$1
+            shift
+            ;;
         .env-*)
-        SERVER_ENV=$1
-        shift
-        ;;
+            SERVER_ENV=$1
+            shift
+            ;;
         -wm|--warn-message)
-        WARN_MESSAGE="$2"
-        shift
-        shift
-        ;;
+            WARN_MESSAGE="$2"
+            shift
+            shift
+            ;;
         -km|--kick-message)
-        KICK_MESSAGE="$2"
-        shift
-        shift
-        ;;
+            KICK_MESSAGE="$2"
+            shift
+            shift
+            ;;
         -f|--force)
-        FORCE=true
-        shift
-        ;;
+            FORCE=true
+            shift
+            ;;
         -v|--verbose)
-        VERBOSE=true
-        shift
-        ;;
-        -*|--*)
-        echo "Unknown option $1"
-        exit -1
-        ;;
-        *)
-        POSITIONAL_ARGS+=("$1")
-        shift
-        ;;
+            VERBOSE=true
+            shift
+            ;;
+        -*|--*|*)
+            echo "Unknown option $1"
+            exit -1
+            ;;
     esac
 done
-
-set -- "${POSITIONAL_ARGS[@]}"
 
 if [ $SERVER_ENV ]; then
     export $(cat $SERVER_ENV | xargs)
